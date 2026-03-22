@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VAULT</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--s1:#111118;--s2:#18181f;--bd:#252530;
+  --ac:#c8ff57;--ac2:#57c8ff;--rd:#ff5757;--tx:#e0e0ee;--mt:#52527a;
+  --r:3px;--mono:'Space Mono',monospace;--disp:'Syne',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{background:var(--bg);color:var(--tx);font-family:var(--mono);min-height:100dvh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");opacity:.25}
+
+/* LOGIN */
+#login-page{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:16px;position:relative}
+.lg-grid{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:48px 48px;opacity:.35}
+.lg-glow{position:fixed;width:400px;height:400px;background:radial-gradient(circle,rgba(200,255,87,.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.lg-card{position:relative;width:100%;max-width:360px;background:var(--s1);border:1px solid var(--bd);padding:26px 22px 22px;animation:fadeUp .5s ease forwards}
+.lg-card::before{content:'';position:absolute;top:0;left:20px;right:20px;height:2px;background:linear-gradient(90deg,transparent,var(--ac),transparent)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.lg-logo{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.lg-icon{width:30px;height:30px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:14px}
+.lg-title{font-family:var(--disp);font-size:19px;font-weight:800;letter-spacing:5px}
+.lg-title span{color:var(--ac)}
+.lbl{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--mt);text-transform:uppercase;display:block;margin-bottom:5px}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);font-family:var(--mono);font-size:13px;padding:10px 12px;margin-bottom:14px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 2px rgba(200,255,87,.1)}
+.lg-btn{width:100%;background:var(--ac);color:#0a0a0f;border:none;padding:11px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:var(--r);transition:all .2s}
+.lg-btn:hover{background:#d4ff70;box-shadow:0 4px 18px rgba(200,255,87,.25)}
+.lg-btn:active{transform:scale(.99)}
+.lg-err{margin-top:10px;padding:7px 11px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.22);border-radius:var(--r);font-size:9px;color:var(--rd);display:none}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.lg-foot{margin-top:18px;padding-top:12px;border-top:1px solid var(--bd);font-size:9px;color:var(--mt);text-align:center;letter-spacing:1px}
+
+/* DASHBOARD */
+#dash-page{display:none;flex-direction:column;min-height:100dvh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--s1);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;gap:8px}
+.tb-logo{font-family:var(--disp);font-size:14px;font-weight:800;letter-spacing:4px;flex-shrink:0}
+.tb-logo span{color:var(--ac)}
+.tb-right{display:flex;align-items:center;gap:7px}
+.admin-badge{display:flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(200,255,87,.07);border:1px solid rgba(200,255,87,.18);border-radius:2px;font-size:8px;font-weight:700;color:var(--ac);letter-spacing:1.5px;white-space:nowrap}
+.dot{width:5px;height:5px;background:var(--ac);border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.logout-btn{background:none;border:1px solid var(--bd);color:var(--mt);padding:3px 9px;font-family:var(--mono);font-size:8px;letter-spacing:1px;cursor:pointer;border-radius:var(--r);transition:all .2s;white-space:nowrap}
+.logout-btn:hover{border-color:var(--rd);color:var(--rd)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--bd);background:var(--s1);position:sticky;top:41px;z-index:99;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:58px;padding:8px 4px;text-align:center;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mt);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;white-space:nowrap}
+.tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+.tab.ng-tab.active{color:var(--ac2);border-bottom-color:var(--ac2)}
+
+/* PANELS */
+.panels{flex:1;overflow-y:auto}
+.panel{display:none;padding:10px}
+.panel.active{display:block}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:12px;margin-bottom:9px}
+.sec-lbl{font-size:8px;font-weight:700;letter-spacing:3px;color:var(--mt);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.stat{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:9px 10px}
+.stat-lbl{font-size:8px;font-weight:700;letter-spacing:2px;color:var(--mt);text-transform:uppercase;margin-bottom:3px}
+.stat-val{font-family:var(--disp);font-size:20px;font-weight:800;line-height:1}
+.stat-unit{font-size:8px;color:var(--mt);margin-top:1px}
+.mini-bar{height:2px;background:var(--bd);border-radius:2px;margin-top:5px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+
+/* UPLOAD */
+.drop-zone{border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative}
+.drop-zone:hover,.drop-zone.over{border-color:var(--ac);background:rgba(200,255,87,.02)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-ico{font-size:20px;margin-bottom:5px}
+.drop-txt{font-size:10px;font-weight:700;margin-bottom:2px}
+.drop-sub{font-size:8px;color:var(--mt)}
+.drop-sel{margin-top:6px;font-size:8px;color:var(--ac);display:none;word-break:break-all}
+.prog-wrap{height:2px;background:var(--s2);border-radius:2px;overflow:hidden;margin:7px 0;display:none}
+.prog-bar{height:100%;background:var(--ac);width:0%;transition:width .3s}
+.up-btn{width:100%;background:var(--ac);color:#0a0a0f;border:none;padding:9px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:var(--r);transition:all .2s;margin-top:7px}
+.up-btn:hover:not(:disabled){background:#d4ff70;box-shadow:0 3px 12px rgba(200,255,87,.2)}
+.up-btn:disabled{background:var(--s2);color:var(--mt);cursor:not-allowed}
+.stor-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.stor-key{font-size:8px;color:var(--mt)}
+.stor-val{font-size:8px;color:var(--tx)}
+
+/* FILES */
+.files-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cnt-badge{font-size:8px;color:var(--ac);background:rgba(200,255,87,.08);border:1px solid rgba(200,255,87,.18);padding:2px 7px;border-radius:2px}
+.files-list{display:flex;flex-direction:column;gap:5px}
+.fitem{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);transition:border-color .2s;animation:itemIn .25s ease forwards;opacity:0;transform:translateY(4px)}
+@keyframes itemIn{to{opacity:1;transform:translateY(0)}}
+.fitem:hover{border-color:rgba(200,255,87,.2)}
+.f-ico{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:12px}
+.f-info{flex:1;min-width:0}
+.f-name{font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.f-meta{font-size:8px;color:var(--mt)}
+.f-acts{display:flex;gap:4px;flex-shrink:0}
+.btn-dl{background:rgba(200,255,87,.1);border:1px solid rgba(200,255,87,.22);color:var(--ac);padding:4px 8px;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;border-radius:var(--r);transition:all .2s;text-decoration:none;display:inline-block}
+.btn-dl:hover{background:rgba(200,255,87,.18)}
+.btn-del{background:none;border:1px solid var(--bd);color:var(--mt);padding:4px 7px;font-family:var(--mono);font-size:9px;cursor:pointer;border-radius:var(--r);transition:all .2s}
+.btn-del:hover{border-color:var(--rd);color:var(--rd)}
+.empty{text-align:center;padding:24px 16px;color:var(--mt)}
+.empty-ico{font-size:24px;opacity:.3;margin-bottom:7px}
+.empty-txt{font-size:8px;letter-spacing:2px}
+
+/* server badge */
+.srv-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(87,200,255,.07);border:1px solid rgba(87,200,255,.18);border-radius:2px;font-size:7px;color:var(--ac2);letter-spacing:1px}
+.srv-dot{width:4px;height:4px;background:var(--ac2);border-radius:50%}
+
+/* NGROK TERMINAL */
+.ng-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ng-status{display:flex;align-items:center;gap:6px;font-size:8px;color:var(--mt);letter-spacing:1px}
+.ng-sdot{width:6px;height:6px;border-radius:50%;background:var(--mt);flex-shrink:0;transition:background .3s}
+.ng-sdot.on{background:#27c93f;box-shadow:0 0 7px rgba(39,201,63,.55);animation:blink 1.5s ease infinite}
+.ng-sdot.conn{background:var(--ac);animation:blink .5s step-end infinite}
+.tw{background:#0c0c13;border:1px solid #222230;border-radius:5px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.55)}
+.tw-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:#15151e;border-bottom:1px solid #1e1e2a}
+.tw-dots{display:flex;gap:5px}
+.td{width:10px;height:10px;border-radius:50%}
+.td.r{background:#ff5f56}.td.y{background:#ffbd2e}.td.g{background:#27c93f}
+.tw-title{flex:1;text-align:center;font-size:8px;color:#44445a;letter-spacing:1px}
+.tw-out{padding:12px 14px;min-height:260px;max-height:44vh;overflow-y:auto;line-height:1.75;font-size:11px}
+.tw-out::-webkit-scrollbar{width:3px}
+.tw-out::-webkit-scrollbar-track{background:#0c0c13}
+.tw-out::-webkit-scrollbar-thumb{background:#222230;border-radius:2px}
+.tl{display:block;white-space:pre-wrap;word-break:break-all}
+.tl.dim{color:#28283a}.tl.mt{color:#44445a}.tl.info{color:#c0c0d8}
+.tl.ok{color:#c8ff57}.tl.url{color:#57c8ff}.tl.warn{color:#ffb857}
+.tl.err{color:#ff5757}.tl.sep{color:#1e1e2a}.tl.req-ok{color:#6aaa30}.tl.req-warn{color:#cc9030}
+.cursor{display:inline-block;width:7px;height:12px;background:var(--ac);animation:cur .85s step-end infinite;vertical-align:middle;margin-left:2px}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+.link-bar{margin:0;padding:10px 14px;background:#0b1a0b;border-top:1px solid rgba(200,255,87,.15);display:none}
+.link-bar-lbl{font-size:7px;color:#4a7a3a;letter-spacing:2px;margin-bottom:5px}
+.link-row{display:flex;align-items:center;gap:8px}
+.link-txt{flex:1;font-size:11px;color:var(--ac2);word-break:break-all}
+.copy-btn{background:rgba(200,255,87,.1);border:1px solid rgba(200,255,87,.22);color:var(--ac);padding:4px 10px;font-family:var(--mono);font-size:8px;font-weight:700;cursor:pointer;border-radius:var(--r);transition:all .2s;flex-shrink:0}
+.copy-btn:hover{background:rgba(200,255,87,.2)}
+.tw-foot{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#15151e;border-top:1px solid #1e1e2a;flex-wrap:wrap}
+.port-row{display:flex;align-items:center;gap:6px}
+.port-lbl{font-size:8px;color:#44445a;letter-spacing:1.5px}
+.port-inp{width:72px;background:#0c0c13;border:1px solid #222230;color:#c0c0d8;font-family:var(--mono);font-size:11px;padding:4px 7px;border-radius:3px;outline:none;transition:border-color .2s}
+.port-inp:focus{border-color:var(--ac2)}
+.req-ctr{flex:1;text-align:right;font-size:8px;color:var(--ac2)}
+.ng-start{background:var(--ac2);color:#0a0a0f;border:none;padding:5px 14px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:var(--r);transition:all .2s;white-space:nowrap}
+.ng-start:hover{background:#7dd8ff;box-shadow:0 3px 12px rgba(87,200,255,.3)}
+.ng-start:disabled{background:var(--s2);color:var(--mt);cursor:not-allowed;box-shadow:none}
+.ng-stop{background:none;border:1px solid rgba(255,87,87,.3);color:var(--rd);padding:5px 12px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:var(--r);transition:all .2s;white-space:nowrap;display:none}
+.ng-stop:hover{background:rgba(255,87,87,.08)}
+.guide{margin-top:10px}
+.g-step{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:6px}
+.g-num{width:17px;height:17px;background:rgba(87,200,255,.1);border:1px solid rgba(87,200,255,.22);border-radius:2px;font-size:8px;font-weight:700;color:var(--ac2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.g-body{flex:1}
+.g-title{font-size:9px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.g-desc{font-size:8px;color:var(--mt);line-height:1.5}
+.g-code{display:inline-block;background:#0c0c13;border:1px solid var(--bd);color:var(--ac2);font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:2px;margin-top:3px;word-break:break-all}
+
+/* TOAST */
+#toast{position:fixed;bottom:16px;right:12px;left:12px;max-width:280px;margin-left:auto;background:var(--s1);border:1px solid var(--bd);border-left:3px solid var(--ac);padding:9px 13px;font-size:9px;color:var(--tx);z-index:10000;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none;border-radius:var(--r)}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.err{border-left-color:var(--rd)}
+
+@media(min-width:680px){
+  .stats-row{grid-template-columns:repeat(4,1fr)}
+  .tw-out{font-size:12px;max-height:50vh}
+}
+@media(max-width:400px){.admin-badge .ab-lbl{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="lg-grid"></div>
+  <div class="lg-glow"></div>
+  <div class="lg-card">
+    <div class="lg-logo">
+      <div class="lg-icon">🔐</div>
+      <div class="lg-title">V<span>A</span>ULT</div>
+    </div>
+    <label class="lbl">Username</label>
+    <input class="inp" type="text" id="u-inp" placeholder="kaztral" autocomplete="off"/>
+    <label class="lbl">Password</label>
+    <input class="inp" type="password" id="p-inp" placeholder="••••••••" autocomplete="off"/>
+    <button class="lg-btn" onclick="doLogin()">ACCESS VAULT →</button>
+    <div class="lg-err" id="lg-err">⚠ INVALID CREDENTIALS. ACCESS DENIED.</div>
+    <div class="lg-foot">PRIVATE ADMIN PANEL · UNAUTHORIZED ACCESS PROHIBITED</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash-page">
+  <div class="topbar">
+    <div class="tb-logo">V<span>A</span>ULT</div>
+    <div class="tb-right">
+      <div class="srv-badge"><div class="srv-dot"></div>SERVER</div>
+      <div class="admin-badge"><div class="dot"></div><span class="ab-lbl">KAZTRAL</span></div>
+      <button class="logout-btn" onclick="doLogout()">EXIT</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="upload" onclick="switchTab('upload')">↑ UPLOAD</div>
+    <div class="tab" data-tab="files" onclick="switchTab('files')">📂 FILES</div>
+    <div class="tab" data-tab="stats" onclick="switchTab('stats')">📊 STATS</div>
+    <div class="tab ng-tab" data-tab="ngrok" onclick="switchTab('ngrok')">⚡ NGROK</div>
+  </div>
+
+  <div class="panels">
+
+    <!-- UPLOAD -->
+    <div class="panel active" id="tab-upload">
+      <div class="card">
+        <div class="sec-lbl">Upload to Server</div>
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="f-inp" multiple onchange="onFileSel(this)"/>
+          <div class="drop-ico">📁</div>
+          <div class="drop-txt">Drop files here</div>
+          <div class="drop-sub">Saved permanently to server disk</div>
+          <div class="drop-sel" id="drop-sel"></div>
+        </div>
+        <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+        <button class="up-btn" id="up-btn" disabled onclick="doUpload()">SELECT FILES TO UPLOAD</button>
+      </div>
+      <div class="card">
+        <div class="sec-lbl">Storage</div>
+        <div class="stor-row"><span class="stor-key">USED</span><span class="stor-val" id="stor-used">—</span></div>
+        <div class="mini-bar"><div class="mini-bar-fill" id="stor-fill" style="background:var(--ac);width:1%"></div></div>
+        <div class="stor-row" style="margin-top:8px;margin-bottom:0"><span class="stor-key">FILES ON DISK</span><span class="stor-val" id="stor-cnt">—</span></div>
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div class="panel" id="tab-files">
+      <div class="card">
+        <div class="files-hdr">
+          <div class="sec-lbl" style="margin-bottom:0;flex:1">Files on Disk</div>
+          <div class="cnt-badge" id="cnt-badge">0</div>
+        </div>
+        <div class="files-list" id="files-list">
+          <div class="empty"><div class="empty-ico">📂</div><div class="empty-txt">LOADING…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="panel" id="tab-stats">
+      <div class="card">
+        <div class="sec-lbl">System Stats</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-lbl">Files</div><div class="stat-val" id="s-files">—</div><div class="stat-unit">on disk</div></div>
+          <div class="stat"><div class="stat-lbl">Size</div><div class="stat-val" id="s-size">—</div><div class="stat-unit" id="s-unit">MB</div></div>
+          <div class="stat"><div class="stat-lbl">RAM</div><div class="stat-val" id="s-ram">—</div><div class="stat-unit">used</div><div class="mini-bar"><div class="mini-bar-fill" id="ram-fill" style="background:#ffb857;width:0%"></div></div></div>
+          <div class="stat"><div class="stat-lbl">Free RAM</div><div class="stat-val" id="s-free">—</div><div class="stat-unit">free</div><div class="mini-bar"><div class="mini-bar-fill" id="free-fill" style="background:var(--ac2);width:0%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NGROK TERMINAL -->
+    <div class="panel" id="tab-ngrok" style="padding:10px">
+      <div class="ng-top">
+        <div class="ng-status"><div class="ng-sdot" id="ng-dot"></div><span id="ng-stxt">TUNNEL OFFLINE</span></div>
+        <div style="font-size:7px;color:var(--mt);letter-spacing:1px">NGROK TERMINAL</div>
+      </div>
+      <div class="tw">
+        <div class="tw-bar">
+          <div class="tw-dots"><div class="td r"></div><div class="td y"></div><div class="td g"></div></div>
+          <div class="tw-title">kaztral@vault — ngrok</div>
+        </div>
+        <div class="tw-out" id="tw-out">
+          <span class="tl mt">ngrok tunnel simulator — VAULT</span>
+          <span class="tl sep">──────────────────────────────────────</span>
+          <span class="tl mt">Enter port and press START TUNNEL.</span>
+          <span class="tl dim"> </span>
+          <span class="tl info">$ <span class="cursor"></span></span>
+        </div>
+        <div class="link-bar" id="link-bar">
+          <div class="link-bar-lbl">🌐 FORWARDING URL</div>
+          <div class="link-row">
+            <div class="link-txt" id="link-txt">—</div>
+            <button class="copy-btn" onclick="copyLink()">COPY</button>
+          </div>
+        </div>
+        <div class="tw-foot">
+          <div class="port-row">
+            <span class="port-lbl">PORT</span>
+            <input class="port-inp" type="number" id="port-inp" value="3000" min="1" max="65535"/>
+          </div>
+          <div class="req-ctr" id="req-ctr"></div>
+          <button class="ng-start" id="ng-start" onclick="startTunnel()">▶ START TUNNEL</button>
+          <button class="ng-stop" id="ng-stop" onclick="stopTunnel()">■ STOP</button>
+        </div>
+      </div>
+
+      <div class="guide">
+        <div class="sec-lbl" style="margin-top:14px">Real ngrok Setup</div>
+        <div class="g-step"><div class="g-num">1</div><div class="g-body"><div class="g-title">Install ngrok in Termux</div><div class="g-code">pkg install ngrok</div></div></div>
+        <div class="g-step"><div class="g-num">2</div><div class="g-body"><div class="g-title">Add auth token</div><div class="g-code">ngrok config add-authtoken TOKEN</div></div></div>
+        <div class="g-step"><div class="g-num">3</div><div class="g-body"><div class="g-title">Start the server (new session)</div><div class="g-code">node server.js</div></div></div>
+        <div class="g-step"><div class="g-num">4</div><div class="g-body"><div class="g-title">Start tunnel (another session)</div><div class="g-code">ngrok http 3000</div></div></div>
+        <div class="g-step"><div class="g-num">5</div><div class="g-body"><div class="g-title">Copy the URL — access globally</div><div class="g-desc">Files survive refresh, restart, everything — saved on disk.</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CREDS={u:'kaztral',p:'1234'};
+let pending=[];
+
+/* ── LOGIN ── */
+function doLogin(){
+  const u=document.getElementById('u-inp').value.trim(),p=document.getElementById('p-inp').value;
+  if(u===CREDS.u&&p===CREDS.p){
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('dash-page').style.display='flex';
+    loadFiles();
+  }else{
+    const e=document.getElementById('lg-err');e.style.display='block';e.style.animation='none';
+    setTimeout(()=>e.style.animation='shake .3s ease',10);
+  }
+}
+document.getElementById('p-inp').addEventListener('keydown',e=>e.key==='Enter'&&doLogin());
+document.getElementById('u-inp').addEventListener('keydown',e=>e.key==='Enter'&&document.getElementById('p-inp').focus());
+function doLogout(){
+  stopTunnel(true);
+  document.getElementById('dash-page').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  ['u-inp','p-inp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('lg-err').style.display='none';
+}
+
+/* ── TABS ── */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+}
+
+/* ── DRAG/DROP ── */
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');setSel(e.dataTransfer.files);});
+function onFileSel(i){if(i.files.length)setSel(i.files);}
+function setSel(list){
+  pending=Array.from(list);
+  const s=document.getElementById('drop-sel');s.style.display='block';
+  s.textContent=pending.map(f=>f.name).join(', ');
+  const b=document.getElementById('up-btn');b.disabled=false;
+  b.textContent='UPLOAD '+pending.length+' FILE'+(pending.length>1?'S':'');
+}
+
+/* ── UPLOAD → SERVER ── */
+async function doUpload(){
+  if(!pending.length)return;
+  const pw=document.getElementById('prog-wrap'),pb=document.getElementById('prog-bar'),btn=document.getElementById('up-btn');
+  pw.style.display='block';btn.disabled=true;btn.textContent='UPLOADING…';
+
+  // fake progress animation while XHR uploads
+  let fake=0;
+  const fakeIv=setInterval(()=>{
+    fake=Math.min(fake+5,90);
+    pb.style.width=fake+'%';
+  },100);
+
+  try {
+    const fd=new FormData();
+    pending.forEach(f=>fd.append('file',f));
+    const res=await fetch('/api/upload',{method:'POST',body:fd});
+    const data=await res.json();
+    clearInterval(fakeIv);
+    pb.style.width='100%';
+    if(data.ok){
+      setTimeout(()=>{
+        pw.style.display='none';pb.style.width='0%';
+        btn.disabled=true;btn.textContent='SELECT FILES TO UPLOAD';
+        document.getElementById('drop-sel').style.display='none';
+        document.getElementById('f-inp').value='';
+        pending=[];
+        loadFiles();
+        toast('✓ Saved to disk');
+      },300);
+    }else{
+      throw new Error(data.error||'Upload failed');
+    }
+  }catch(e){
+    clearInterval(fakeIv);
+    pw.style.display='none';pb.style.width='0%';
+    btn.disabled=false;btn.textContent='RETRY UPLOAD';
+    toast('✗ '+e.message,true);
+  }
+}
+
+/* ── LOAD FILES FROM SERVER ── */
+async function loadFiles(){
+  try{
+    const res=await fetch('/api/files');
+    const data=await res.json();
+    renderFiles(data.files,data.totalSize);
+    renderStats(data);
+  }catch(e){
+    // server not running — show helpful message
+    document.getElementById('files-list').innerHTML=
+      '<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt" style="color:var(--rd)">SERVER OFFLINE<br><span style="font-size:7px;opacity:.6">Run: node server.js</span></div></div>';
+    toast('✗ Cannot reach server',true);
+  }
+}
+
+/* ── ICONS ── */
+const IC={pdf:{i:'📄',b:'rgba(255,87,87,.1)'},zip:{i:'📦',b:'rgba(255,184,87,.1)'},rar:{i:'📦',b:'rgba(255,184,87,.1)'},'7z':{i:'📦',b:'rgba(255,184,87,.1)'},mp4:{i:'🎬',b:'rgba(87,200,255,.1)'},mov:{i:'🎬',b:'rgba(87,200,255,.1)'},mp3:{i:'🎵',b:'rgba(200,87,255,.1)'},wav:{i:'🎵',b:'rgba(200,87,255,.1)'},png:{i:'🖼️',b:'rgba(200,255,87,.1)'},jpg:{i:'🖼️',b:'rgba(200,255,87,.1)'},jpeg:{i:'🖼️',b:'rgba(200,255,87,.1)'},gif:{i:'🖼️',b:'rgba(200,255,87,.1)'},svg:{i:'🎨',b:'rgba(200,255,87,.1)'},js:{i:'⚡',b:'rgba(255,220,87,.1)'},ts:{i:'⚡',b:'rgba(87,148,255,.1)'},py:{i:'🐍',b:'rgba(87,200,255,.1)'},html:{i:'🌐',b:'rgba(255,120,87,.1)'},css:{i:'🎨',b:'rgba(87,87,255,.1)'},json:{i:'📋',b:'rgba(200,255,87,.1)'},txt:{i:'📝',b:'rgba(150,150,150,.1)'},md:{i:'📝',b:'rgba(150,150,150,.1)'}};
+function ico(n){const e=n.split('.').pop().toLowerCase();return IC[e]||{i:'📄',b:'rgba(150,150,150,.1)'};}
+function fmt(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';if(b<1073741824)return(b/1048576).toFixed(1)+' MB';return(b/1073741824).toFixed(2)+' GB';}
+
+/* ── RENDER FILES ── */
+function renderFiles(files,totalSize){
+  const el=document.getElementById('files-list');
+  if(!files||!files.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">📂</div><div class="empty-txt">NO FILES ON DISK</div></div>';
+  }else{
+    el.innerHTML=files.map((f,i)=>{
+      const ic=ico(f.name);
+      const dl='/uploads/'+encodeURIComponent(f.name);
+      return '<div class="fitem" style="animation-delay:'+i*25+'ms">'
+        +'<div class="f-ico" style="background:'+ic.b+'">'+ic.i+'</div>'
+        +'<div class="f-info"><div class="f-name" title="'+f.name+'">'+f.name+'</div>'
+        +'<div class="f-meta">'+fmt(f.size)+'</div></div>'
+        +'<div class="f-acts">'
+        +'<a class="btn-dl" href="'+dl+'" download="'+f.name+'">↓</a>'
+        +'<button class="btn-del" onclick="delFile(\''+encodeURIComponent(f.name)+'\')">✕</button>'
+        +'</div></div>';
+    }).join('');
+  }
+  const c=files?files.length:0;
+  document.getElementById('cnt-badge').textContent=c;
+  document.getElementById('stor-cnt').textContent=c+' file'+(c!==1?'s':'');
+  document.getElementById('stor-used').textContent=totalSize?fmt(totalSize):'0 B';
+  const pct=totalSize?Math.max(Math.min((totalSize/(1024*1024*500))*100,100),1):1;
+  document.getElementById('stor-fill').style.width=pct+'%';
+  document.getElementById('s-files').textContent=c;
+}
+
+/* ── RENDER STATS ── */
+function renderStats(data){
+  const bytes=data.totalSize||0,mb=bytes/1048576;
+  if(mb>=1000){document.getElementById('s-size').textContent=(mb/1024).toFixed(1);document.getElementById('s-unit').textContent='GB';}
+  else{document.getElementById('s-size').textContent=mb.toFixed(1);document.getElementById('s-unit').textContent='MB';}
+  if(data.ram){
+    const usedMB=(data.ram.used/1048576).toFixed(0);
+    const freeMB=(data.ram.free/1048576).toFixed(0);
+    const pctUsed=Math.round((data.ram.used/data.ram.total)*100);
+    const pctFree=Math.round((data.ram.free/data.ram.total)*100);
+    document.getElementById('s-ram').textContent=usedMB+' MB';
+    document.getElementById('s-free').textContent=freeMB+' MB';
+    document.getElementById('ram-fill').style.width=pctUsed+'%';
+    document.getElementById('free-fill').style.width=pctFree+'%';
+  }
+}
+
+/* ── DELETE FILE ── */
+async function delFile(name){
+  try{
+    const res=await fetch('/api/files/'+name,{method:'DELETE'});
+    const data=await res.json();
+    if(data.ok){loadFiles();toast('Removed from disk');}
+    else toast('✗ '+data.error,true);
+  }catch(e){toast('✗ Server error',true);}
+}
+
+/* ── TOAST ── */
+let tt;
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className=(err?'err ':'')+'show';clearTimeout(tt);tt=setTimeout(()=>t.className=err?'err':'',2600);}
+
+/* ══════════════════════════════════
+   NGROK TERMINAL SIMULATOR
+══════════════════════════════════ */
+let ngRunning=false,reqTimer=null,reqCount=0,fakeUrl='';
+function randHex(n){return Array.from({length:n},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');}
+function randWord(){const w=['amber','cloud','delta','echo','frost','ghost','indigo','jade','kilo','lunar','mist','nova','orbit','pulse','quartz','reef','storm','terra','ultra','vapor'];return w[Math.floor(Math.random()*w.length)];}
+function writeLine(cls,text,delay){
+  return new Promise(res=>{
+    setTimeout(()=>{
+      const tb=document.getElementById('tw-out');
+      const old=tb.querySelector('.tl.info:last-child');
+      if(old&&old.innerHTML.includes('cursor'))old.remove();
+      const s=document.createElement('span');s.className='tl '+cls;s.textContent=text;
+      tb.appendChild(s);tb.scrollTop=tb.scrollHeight;res();
+    },delay);
+  });
+}
+function addCursor(){const tb=document.getElementById('tw-out');const s=document.createElement('span');s.className='tl info';s.innerHTML='$ <span class="cursor"></span>';tb.appendChild(s);tb.scrollTop=tb.scrollHeight;}
+function clearCursor(){const tb=document.getElementById('tw-out');const old=tb.querySelector('.tl.info:last-child');if(old&&old.innerHTML.includes('cursor'))old.remove();}
+async function startTunnel(){
+  if(ngRunning)return;
+  const port=document.getElementById('port-inp').value||3000;
+  ngRunning=true;reqCount=0;
+  document.getElementById('ng-start').disabled=true;
+  document.getElementById('ng-stop').style.display='inline-block';
+  document.getElementById('ng-dot').className='ng-sdot conn';
+  document.getElementById('ng-stxt').textContent='CONNECTING…';
+  document.getElementById('link-bar').style.display='none';
+  document.getElementById('req-ctr').textContent='';
+  document.getElementById('tw-out').innerHTML='';
+  const id=randWord()+'-'+randWord()+'-'+randHex(4);
+  fakeUrl='https://'+id+'.ngrok-free.app';
+  const lines=[
+    ['mt','$ ngrok http '+port,0],['sep','──────────────────────────────────────',320],
+    ['mt','ngrok                          (Ctrl+C to quit)',420],['dim',' ',500],
+    ['mt','Initializing…',600],['mt','Authenticating with ngrok edge servers…',1000],
+    ['mt','Establishing encrypted tunnel…',1700],['dim',' ',2500],
+    ['ok','✓ Session online',2600],['dim',' ',2700],
+    ['mt','Session Status         online',2800],['mt','Account                kaztral (Plan: Free)',2900],
+    ['mt','Version                3.18.4',3000],['mt','Region                 Asia Pacific (ap)',3100],
+    ['mt','Latency                14ms',3200],['mt','Web Interface          http://127.0.0.1:4040',3300],
+    ['dim',' ',3400],['sep','──────────────────────────────────────',3450],
+    ['mt','Forwarding',3500],['url','  '+fakeUrl+' → http://localhost:'+port,3600],
+    ['sep','──────────────────────────────────────',3700],['dim',' ',3750],
+    ['mt','Connections  ttl  opn   rt1   rt5   p50   p90',3800],
+    ['mt','             0    0     0.00  0.00  0.00  0.00',3900],['dim',' ',3950],
+  ];
+  for(const [cls,text,delay] of lines){if(!ngRunning)break;await writeLine(cls,text,delay-0);}
+  if(!ngRunning)return;
+  document.getElementById('ng-dot').className='ng-sdot on';
+  document.getElementById('ng-stxt').textContent='TUNNEL ACTIVE';
+  document.getElementById('link-txt').textContent=fakeUrl;
+  document.getElementById('link-bar').style.display='block';
+  document.getElementById('ng-start').disabled=false;
+  addCursor();
+  reqTimer=setInterval(simulateReq,3500+Math.random()*3000);
+}
+const METHODS=['GET','GET','GET','POST','GET'];
+const PATHS=['/','/','/','/upload','/files'];
+const STATS=[200,200,200,200,304,404];
+const SC={200:'req-ok',304:'mt',404:'req-warn',500:'err'};
+function simulateReq(){
+  if(!ngRunning)return;
+  clearCursor();
+  const m=METHODS[Math.floor(Math.random()*METHODS.length)];
+  const path=PATHS[Math.floor(Math.random()*PATHS.length)];
+  const st=STATS[Math.floor(Math.random()*STATS.length)];
+  const ms=(10+Math.random()*90).toFixed(0);
+  const now=new Date().toLocaleTimeString('en-US',{hour12:false});
+  reqCount++;
+  const tb=document.getElementById('tw-out');
+  const s=document.createElement('span');s.className='tl '+(SC[st]||'mt');
+  s.textContent=now+'  '+m.padEnd(5)+' '+path.padEnd(14)+st+'  '+ms+'ms';
+  tb.appendChild(s);tb.scrollTop=tb.scrollHeight;
+  document.getElementById('req-ctr').textContent=reqCount+' REQ';
+  addCursor();
+  clearInterval(reqTimer);
+  if(ngRunning)reqTimer=setInterval(simulateReq,3500+Math.random()*4000);
+}
+async function stopTunnel(silent=false){
+  if(!ngRunning&&reqTimer===null)return;
+  clearInterval(reqTimer);reqTimer=null;ngRunning=false;
+  document.getElementById('ng-dot').className='ng-sdot';
+  document.getElementById('ng-stxt').textContent='TUNNEL OFFLINE';
+  document.getElementById('ng-stop').style.display='none';
+  document.getElementById('link-bar').style.display='none';
+  if(!silent){
+    clearCursor();
+    const lines=[['dim',' ',80],['warn','  ^C',200],['mt','Closing session…',500],['err','✗ Tunnel closed',900],['dim',' ',1000]];
+    let base=0;for(const[cls,text,d]of lines){await writeLine(cls,text,d-base);base=d;}
+    addCursor();
+  }
+  fakeUrl='';
+}
+function copyLink(){
+  if(!fakeUrl)return;
+  const fb=()=>{const el=document.createElement('textarea');el.value=fakeUrl;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('✓ URL copied');};
+  if(navigator.clipboard)navigator.clipboard.writeText(fakeUrl).then(()=>toast('✓ URL copied')).catch(fb);
+  else fb();
+}
+</script>
+</body>
+</html>
