@@ -36,6 +36,17 @@ VAULT is designed to be:
 - File explorer interface
 - Upload progress indicator
 - Terminal-style design
+ ## 🔐 Change Admin Credentials
+
+To update the admin login credentials, edit the following line in your HTML file.
+
+### 📍 Code Reference (Line ~320)
+
+``javascript
+// Line 320
+const CREDS = { u: 'admin', p: '1234' };
+// Line 320 (after change)
+const CREDS = { u: 'your_username', p: 'your_password' };
 
 ### 🌍 Networking
 - Local server (`localhost`)
