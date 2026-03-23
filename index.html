@@ -188,7 +188,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
       <div class="lg-title">V<span>A</span>ULT</div>
     </div>
     <label class="lbl">Username</label>
-    <input class="inp" type="text" id="u-inp" placeholder="kaztral" autocomplete="off"/>
+    <input class="inp" type="text" id="u-inp" placeholder="username" autocomplete="off"/>
     <label class="lbl">Password</label>
     <input class="inp" type="password" id="p-inp" placeholder="••••••••" autocomplete="off"/>
     <button class="lg-btn" onclick="doLogin()">ACCESS VAULT →</button>
@@ -203,7 +203,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
     <div class="tb-logo">V<span>A</span>ULT</div>
     <div class="tb-right">
       <div class="srv-badge"><div class="srv-dot"></div>SERVER</div>
-      <div class="admin-badge"><div class="dot"></div><span class="ab-lbl">KAZTRAL</span></div>
+      <div class="admin-badge"><div class="dot"></div><span class="ab-lbl">admin</span></div>
       <button class="logout-btn" onclick="doLogout()">EXIT</button>
     </div>
   </div>
@@ -317,7 +317,7 @@ body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
 <div id="toast"></div>
 
 <script>
-const CREDS={u:'kaztral',p:'1234'};
+const CREDS={u:'admin',p:'1234'};
 let pending=[];
 
 /* ── LOGIN ── */
